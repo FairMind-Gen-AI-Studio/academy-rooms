@@ -58,6 +58,54 @@
 - [ ] `DELETE /api/reservations/[id]`
   - Cancel reservation
 
+### POST /api/reservations
+// Request body
+interface CreateReservationRequest {
+  room_id: string;
+  start_time: string;  // ISO date string
+  end_time: string;    // ISO date string
+  organizer: string;
+  notes?: string;
+  status: 'booked' | 'tentative' | 'cancelled';
+}
+
+// Response
+interface CreateReservationResponse {
+  id: string;
+  room_id: string;
+  start_time: string;
+  end_time: string;
+  organizer: string;
+  notes?: string;
+  status: 'booked' | 'tentative' | 'cancelled';
+  created_at: string;
+}
+
+### PUT /api/reservations/[id]
+// Request body - same as POST
+interface UpdateReservationRequest {
+  start_time?: string;
+  end_time?: string;
+  organizer?: string;
+  notes?: string;
+  status?: 'booked' | 'tentative' | 'cancelled';
+}
+
+### Conflict Checking Logic
+```sql
+-- Check for overlapping reservations
+SELECT id 
+FROM reservations 
+WHERE room_id = :room_id 
+  AND status = 'booked'
+  AND (
+    (start_time <= :new_end_time AND end_time >= :new_start_time)
+    OR (start_time >= :new_start_time AND start_time < :new_end_time)
+    OR (end_time > :new_start_time AND end_time <= :new_end_time)
+  )
+  AND id != :current_reservation_id -- exclude current reservation for updates
+```
+
 ## 3. Supabase Client Setup
 - [ ] Install Supabase client: `npm install @supabase/supabase-js`
 - [ ] Create utils/supabase.js client helper
@@ -112,22 +160,25 @@ created_at: string;
 
 
 ### GET /api/reservations
+
+```typescript
 // Query parameters
 interface ReservationFilters {
-room_id?: string;
-start_date?: string;
-end_date?: string;
-status?: 'booked' | 'tentative' | 'cancelled';
+  room_id?: string;
+  start_date?: string;
+  end_date?: string;
+  status?: 'booked' | 'tentative' | 'cancelled';
 }
+
 // Response
 interface Reservation {
-id: string;
-room_id: string;
-start_time: string;
-end_time: string;
-status: 'booked' | 'tentative' | 'cancelled';
-organizer: string;
-notes?: string;
-created_at: string;
+  id: string;
+  room_id: string;
+  start_time: string;
+  end_time: string;
+  status: 'booked' | 'tentative' | 'cancelled';
+  organizer: string;
+  notes?: string;
+  created_at: string;
 }
 ```
