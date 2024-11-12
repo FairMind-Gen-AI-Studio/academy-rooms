@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import BookingModal from './BookingModal';
 
 const MeetingRoomCalendar = ({ selectedRoom }) => {
   const [reservations, setReservations] = useState([
@@ -30,6 +31,10 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
 
   const [timeZone, setTimeZone] = useState('UTC');
 
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'booked': return 'bg-red-500';
@@ -51,6 +56,35 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
     if (dayReservations.some(res => res.status === 'booked')) return 'booked';
     if (dayReservations.some(res => res.status === 'tentative')) return 'tentative';
     return 'available';
+  };
+
+  const handleSlotClick = (day, reservation) => {
+    setSelectedDate(day);
+    setSelectedReservation(reservation);
+    setIsModalOpen(true);
+  };
+
+  const handleBooking = (bookingData) => {
+    setReservations(prev => {
+      const newReservations = [...prev];
+      if (selectedReservation) {
+        const index = newReservations.findIndex(r => r.id === selectedReservation.id);
+        newReservations[index] = { ...bookingData, id: selectedReservation.id, roomId: selectedRoom.id };
+      } else {
+        newReservations.push({
+          ...bookingData,
+          id: Math.max(...prev.map(r => r.id)) + 1,
+          roomId: selectedRoom.id
+        });
+      }
+      return newReservations;
+    });
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = (reservationId) => {
+    setReservations(prev => prev.filter(r => r.id !== reservationId));
+    setIsModalOpen(false);
   };
 
   const renderCalendar = () => {
@@ -80,13 +114,7 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
                     r.roomId === selectedRoom?.id && 
                     r.start.getDate() === day.getDate()
                   );
-                  if (reservation) {
-                    alert(`
-                      Organizer: ${reservation.organizer}
-                      Time: ${reservation.start.toLocaleTimeString()} - ${reservation.end.toLocaleTimeString()}
-                      Notes: ${reservation.notes}
-                    `);
-                  }
+                  handleSlotClick(day, reservation);
                 }}
               />
             );
@@ -118,6 +146,14 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
         </div>
         {renderCalendar()}
       </CardContent>
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        date={selectedDate}
+        existingReservation={selectedReservation}
+        onBook={handleBooking}
+        onDelete={handleDelete}
+      />
     </Card>
   );
 };
