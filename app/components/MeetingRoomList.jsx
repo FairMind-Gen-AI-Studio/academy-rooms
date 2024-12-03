@@ -1,31 +1,59 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MeetingRoomFilter from './MeetingRoomFilter';
 import MeetingRoomCalendar from './MeetingRoomCalendar';
+import { getRooms } from '@/app/actions/rooms';
 
 const MeetingRoomList = () => {
-  const [rooms, setRooms] = useState([
-    { id: 1, name: 'Conference Room A', capacity: 10, equipment: ['projector', 'whiteboard'] },
-    { id: 2, name: 'Meeting Room B', capacity: 6, equipment: ['smartBoard'] },
-    { id: 3, name: 'Board Room', capacity: 20, equipment: ['videoConference', 'smartBoard'] },
-  ]);
-  const [filteredRooms, setFilteredRooms] = useState(rooms);
+  const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleFilterChange = (filters) => {
-    const filtered = rooms.filter(room => {
-      const matchesSearch = room.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      const matchesCapacity = room.capacity >= filters.capacity;
-      const matchesEquipment = Object.entries(filters.equipment)
-        .filter(([, isSelected]) => isSelected)
-        .every(([equipment]) => room.equipment.includes(equipment));
+  useEffect(() => {
+    loadRooms();
+  }, []);
 
-      return matchesSearch && matchesCapacity && matchesEquipment;
-    });
-
-    setFilteredRooms(filtered);
+  const loadRooms = async () => {
+    try {
+      const data = await getRooms();
+      setRooms(data);
+      setFilteredRooms(data);
+    } catch (error) {
+      console.error('Failed to load rooms:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleFilterChange = async (filters) => {
+    try {
+      console.log('Sending filters:', {
+        capacity: filters.capacity || undefined,
+        equipment: Object.entries(filters.equipment)
+          .filter(([, isSelected]) => isSelected)
+          .map(([equipment]) => equipment),
+        search: filters.searchTerm || undefined
+      });
+      
+      const data = await getRooms({
+        capacity: filters.capacity || undefined,
+        equipment: Object.entries(filters.equipment)
+          .filter(([, isSelected]) => isSelected)
+          .map(([equipment]) => equipment),
+        search: filters.searchTerm || undefined
+      });
+      console.log('Received data:', data);
+      setFilteredRooms(data);
+    } catch (error) {
+      console.error('Failed to filter rooms:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-[200px]">Loading...</div>;
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-4">
@@ -54,7 +82,7 @@ const MeetingRoomList = () => {
         ))}
       </div>
 
-      <MeetingRoomCalendar selectedRoom={selectedRoom} />
+      {selectedRoom && <MeetingRoomCalendar selectedRoom={selectedRoom} />}
     </div>
   );
 };
