@@ -1,8 +1,8 @@
 # API Tasks for SalaPrenotazioni with Supabase
 
 ## 1. Supabase Setup
-- [ ] Create new Supabase project
-- [ ] Set up database tables:
+- [X] Create new Supabase project
+- [X] Set up database tables:
   ```sql
   -- Rooms table
   create table rooms (
@@ -25,8 +25,8 @@
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
   );
   ```
-- [ ] Set up Row Level Security (RLS) policies
-- [ ] Create API keys and environment variables
+- [X] Set up Row Level Security (RLS) policies
+- [X] Create API keys and environment variables
 
 ## 2. Next.js API Routes Setup
 

@@ -1,29 +1,70 @@
+"use client";
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { createReservation, updateReservation, deleteReservation } from '@/app/actions/reservations';
+import { toast } from 'sonner';
 
-const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDelete }) => {
+const BookingModal = ({ isOpen, onClose, date, room, existingReservation, onSuccess }) => {
+  const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState({
     organizer: existingReservation?.organizer || '',
     notes: existingReservation?.notes || '',
-    startTime: existingReservation?.start?.toLocaleTimeString().slice(0, 5) || '09:00',
-    endTime: existingReservation?.end?.toLocaleTimeString().slice(0, 5) || '10:00',
+    startTime: existingReservation?.start_time?.slice(11, 16) || '09:00',
+    endTime: existingReservation?.end_time?.slice(11, 16) || '10:00',
   });
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const reservation = {
-      start: new Date(date.setHours(...formData.startTime.split(':'))),
-      end: new Date(date.setHours(...formData.endTime.split(':'))),
-      organizer: formData.organizer,
-      notes: formData.notes,
-      status: 'booked'
-    };
-    onBook(reservation);
+    setLoading(true);
+    
+    try {
+      const dateStr = date.toISOString().split('T')[0];
+      const reservationData = {
+        room_id: room.id,
+        start_time: `${dateStr}T${formData.startTime}:00Z`,
+        end_time: `${dateStr}T${formData.endTime}:00Z`,
+        organizer: formData.organizer,
+        notes: formData.notes,
+        status: 'booked'
+      };
+
+      if (existingReservation) {
+        await updateReservation(existingReservation.id, reservationData);
+        toast.success('Prenotazione aggiornata con successo');
+      } else {
+        await createReservation(reservationData);
+        toast.success('Prenotazione creata con successo');
+      }
+      
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      toast.error(error.message || 'Errore durante la prenotazione');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!existingReservation?.id) return;
+    
+    setLoading(true);
+    try {
+      await deleteReservation(existingReservation.id);
+      toast.success('Prenotazione eliminata con successo');
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      toast.error(error.message || 'Errore durante l\'eliminazione');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,6 +73,7 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
         <button 
           onClick={onClose}
           className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+          disabled={loading}
         >
           <X className="h-4 w-4" />
         </button>
@@ -48,6 +90,7 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
               value={formData.organizer}
               onChange={e => setFormData({...formData, organizer: e.target.value})}
               required
+              disabled={loading}
             />
           </div>
           
@@ -60,6 +103,7 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
                 value={formData.startTime}
                 onChange={e => setFormData({...formData, startTime: e.target.value})}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -70,6 +114,7 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
                 value={formData.endTime}
                 onChange={e => setFormData({...formData, endTime: e.target.value})}
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -80,6 +125,7 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
               id="notes"
               value={formData.notes}
               onChange={e => setFormData({...formData, notes: e.target.value})}
+              disabled={loading}
             />
           </div>
 
@@ -88,13 +134,14 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
               <Button 
                 type="button" 
                 variant="destructive"
-                onClick={() => onDelete(existingReservation.id)}
+                onClick={handleDelete}
+                disabled={loading}
               >
                 Elimina
               </Button>
             )}
-            <Button type="submit" className="ml-auto">
-              {existingReservation ? 'Aggiorna' : 'Prenota'}
+            <Button type="submit" className="ml-auto" disabled={loading}>
+              {loading ? 'Caricamento...' : existingReservation ? 'Aggiorna' : 'Prenota'}
             </Button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-# Step 0
+# Step 1 - Supabase Integration
 
 # SalaPrenotazioni
 
