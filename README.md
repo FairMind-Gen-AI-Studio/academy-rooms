@@ -1,4 +1,4 @@
-# Step 1 - Supabase Integration
+# Step 2 - Clerk Integration
 
 # SalaPrenotazioni
 

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { currentUser } from "@clerk/nextjs/server";
 
 type ReservationStatus = 'booked' | 'tentative' | 'cancelled'
 
@@ -88,6 +89,12 @@ export async function createReservation(data: {
   notes?: string
   status: ReservationStatus
 }) {
+  const user = await currentUser();
+  
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
   const hasConflicts = await checkConflicts(
     data.room_id,
     data.start_time,
@@ -99,7 +106,10 @@ export async function createReservation(data: {
   }
 
   const supabase = createClient()
-  const { error } = await supabase.from('reservations').insert([data])
+  const { error } = await supabase.from('reservations').insert([{
+    ...data,
+    userId: user.id
+  }])
 
   if (error) throw new Error(error.message)
   revalidatePath('/reservations')
