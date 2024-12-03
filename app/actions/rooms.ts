@@ -2,12 +2,19 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function getRooms(filters?: {
   capacity?: number
   equipment?: string[]
   search?: string
 }) {
+  const user = await currentUser();
+  
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
   const supabase = createClient()
   let query = supabase.from('rooms').select('*')
 
