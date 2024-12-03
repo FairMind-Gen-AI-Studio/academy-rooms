@@ -1,3 +1,5 @@
+# Step 0
+
 # SalaPrenotazioni
 
 A modern meeting room reservation system built with Next.js and Supabase.
