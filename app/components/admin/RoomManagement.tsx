@@ -157,7 +157,7 @@ export default function RoomManagement() {
             />
             <Select
               value={newRoom.status}
-              onValueChange={(value: 'available' | 'booked' | 'maintenance') => setNewRoom({ ...newRoom, status: value })}
+              onValueChange={(value: 'available' | 'maintenance') => setNewRoom({ ...newRoom, status: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
@@ -248,7 +248,7 @@ export default function RoomManagement() {
                   </Button>
                   <Select
                     value={room.status}
-                    onValueChange={(value: 'available' | 'booked' | 'maintenance') => 
+                    onValueChange={(value: 'available' | 'maintenance') => 
                       handleUpdateRoom(room.id, { status: value })
                     }
                   >
