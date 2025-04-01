@@ -7,6 +7,7 @@ export async function getRooms(filters?: {
   capacity?: number
   equipment?: string[]
   search?: string
+  status?: string
 }) {
   const supabase = createClient()
   let query = supabase.from('rooms').select('*')
@@ -23,6 +24,10 @@ export async function getRooms(filters?: {
 
   if (filters?.search) {
     query = query.ilike('name', `%${filters.search}%`)
+  }
+  
+  if (filters?.status) {
+    query = query.eq('status', filters.status)
   }
 
   const { data, error } = await query.order('created_at', { ascending: false })
@@ -49,12 +54,26 @@ export async function createRoom(data: {
   name: string
   capacity: number
   equipment: string[]
+  status: 'available' | 'booked' | 'maintenance'
 }) {
   const supabase = createClient()
+  
+  // Check if room name already exists
+  const { data: existingRoom } = await supabase
+    .from('rooms')
+    .select('id')
+    .eq('name', data.name)
+    .single()
+  
+  if (existingRoom) {
+    throw new Error('Room name must be unique')
+  }
+  
   const { error } = await supabase.from('rooms').insert([data])
 
   if (error) throw new Error(error.message)
   revalidatePath('/rooms')
+  revalidatePath('/admin/rooms')
 }
 
 export async function updateRoom(
@@ -63,9 +82,25 @@ export async function updateRoom(
     name?: string
     capacity?: number
     equipment?: string[]
+    status?: 'available' | 'booked' | 'maintenance'
   }
 ) {
   const supabase = createClient()
+  
+  // If name is being updated, check if it's unique
+  if (data.name) {
+    const { data: existingRoom } = await supabase
+      .from('rooms')
+      .select('id')
+      .eq('name', data.name)
+      .neq('id', id)
+      .single()
+    
+    if (existingRoom) {
+      throw new Error('Room name must be unique')
+    }
+  }
+  
   const { error } = await supabase
     .from('rooms')
     .update(data)
@@ -74,6 +109,7 @@ export async function updateRoom(
   if (error) throw new Error(error.message)
   revalidatePath('/rooms')
   revalidatePath(`/rooms/${id}`)
+  revalidatePath('/admin/rooms')
 }
 
 export async function deleteRoom(id: string) {
