@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 export default function Navigation({ userRole = 'user' }) {
   const pathname = usePathname();
@@ -19,11 +20,11 @@ export default function Navigation({ userRole = 'user' }) {
               </Link>
             </div>
             <div className="ml-6 flex space-x-8">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  pathname === '/' 
-                    ? 'border-indigo-500 text-gray-900' 
+                  pathname === '/'
+                    ? 'border-indigo-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                 }`}
               >
@@ -31,11 +32,11 @@ export default function Navigation({ userRole = 'user' }) {
               </Link>
               
               {isAdmin && (
-                <Link 
-                  href="/admin/rooms" 
+                <Link
+                  href="/admin/rooms"
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    pathname === '/admin/rooms' 
-                      ? 'border-indigo-500 text-gray-900' 
+                    pathname === '/admin/rooms'
+                      ? 'border-indigo-500 text-gray-900'
                       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                   }`}
                 >
@@ -43,6 +44,18 @@ export default function Navigation({ userRole = 'user' }) {
                 </Link>
               )}
             </div>
+          </div>
+          <div className="flex items-center">
+            <SignedIn>
+              <UserButton afterSignOutUrl="/"/>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton>
+                <button className="text-sm font-medium text-gray-700 hover:text-indigo-600">
+                  Sign in
+                </button>
+              </SignInButton>
+            </SignedOut>
           </div>
         </div>
       </div>

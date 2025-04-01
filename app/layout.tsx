@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -22,9 +23,9 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   // Get user role for navigation
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -44,15 +45,13 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Navigation userRole={userRole} />
-        <main className="pt-4">
+    <ClerkProvider>
+      <html className="pt-4" lang="en">
+        <body>
+          <Navigation userRole={userRole} />
           {children}
-        </main>
-      </body>
-    </html>
-  );
+        </body>
+      </html>
+    </ClerkProvider>
+  )
 }
