@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import MeetingRoomFilter from './MeetingRoomFilter';
 import MeetingRoomCalendar from './MeetingRoomCalendar';
 
@@ -13,7 +13,7 @@ const MeetingRoomList = () => {
   const [filteredRooms, setFilteredRooms] = useState(rooms);
   const [selectedRoom, setSelectedRoom] = useState(null);
 
-  const handleFilterChange = (filters) => {
+  const handleFilterChange = useCallback((filters) => {
     const filtered = rooms.filter(room => {
       const matchesSearch = room.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
       const matchesCapacity = room.capacity >= filters.capacity;
@@ -25,7 +25,7 @@ const MeetingRoomList = () => {
     });
 
     setFilteredRooms(filtered);
-  };
+  }, [rooms]);
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-4">

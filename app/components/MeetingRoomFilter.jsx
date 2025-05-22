@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -27,34 +27,40 @@ const MeetingRoomFilter = ({ onFilterChange }) => {
     searchTerm: '',
   });
 
+  // Use useEffect to call onFilterChange whenever filters change
+  // We debounce the filter changes slightly for better performance
+  useEffect(() => {
+    // Small timeout to avoid excessive updates during rapid changes
+    const timeoutId = setTimeout(() => {
+      onFilterChange(filters);
+    }, 50);
+    
+    // Clean up the timeout if filters change before the timeout completes
+    return () => clearTimeout(timeoutId);
+  }, [filters, onFilterChange]);
+
   const handleEquipmentChange = (equipment) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        equipment: {
-          ...prev.equipment,
-          [equipment]: !prev.equipment[equipment]
-        }
-      };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    setFilters(prev => ({
+      ...prev,
+      equipment: {
+        ...prev.equipment,
+        [equipment]: !prev.equipment[equipment]
+      }
+    }));
   };
 
   const handleCapacityChange = (value) => {
-    setFilters(prev => {
-      const newFilters = { ...prev, capacity: value[0] };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    setFilters(prev => ({
+      ...prev,
+      capacity: value[0]
+    }));
   };
 
   const handleSearchChange = (e) => {
-    setFilters(prev => {
-      const newFilters = { ...prev, searchTerm: e.target.value };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    setFilters(prev => ({
+      ...prev,
+      searchTerm: e.target.value
+    }));
   };
 
   return (
@@ -158,7 +164,7 @@ const MeetingRoomFilter = ({ onFilterChange }) => {
               searchTerm: '',
             };
             setFilters(resetFilters);
-            onFilterChange(resetFilters);
+            // No need to call onFilterChange here as useEffect will handle it
           }}
         >
           <RotateCcw className="w-4 h-4" />
