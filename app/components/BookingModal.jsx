@@ -24,6 +24,11 @@ const BookingModal = ({ isOpen, onClose, date, room, existingReservation, onSucc
     setLoading(true);
     
     try {
+      // Ensure date is valid before using it
+      if (!date) {
+        throw new Error('Data non valida. Riprova.');
+      }
+      
       const dateStr = date.toISOString().split('T')[0];
       const reservationData = {
         room_id: room.id,

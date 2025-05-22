@@ -19,10 +19,11 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
   }, [selectedRoom, date]);
 
   const loadReservations = async () => {
-    if (!selectedRoom) return;
+    if (!selectedRoom || !date) return;
     
     setLoading(true);
     try {
+      // Ensure date is valid before using it
       const startDate = new Date(date.getFullYear(), date.getMonth(), 1).toISOString();
       const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString();
       
@@ -48,7 +49,10 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
 
   const handleReservationClick = (reservation) => {
     setSelectedReservation(reservation);
-    setDate(new Date(reservation.start_time));
+    // Ensure reservation.start_time is valid before creating a new Date
+    if (reservation && reservation.start_time) {
+      setDate(new Date(reservation.start_time));
+    }
     setShowModal(true);
   };
 
@@ -81,16 +85,17 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
             }}
             className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
           >
-            Prenota per il {date.toLocaleDateString()}
+            Prenota per il {date ? date.toLocaleDateString() : 'giorno selezionato'}
           </button>
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium">Prenotazioni del {date.toLocaleDateString()}</h3>
+          <h3 className="font-medium">Prenotazioni del {date ? date.toLocaleDateString() : 'giorno selezionato'}</h3>
           {loading ? (
             <div>Caricamento...</div>
           ) : reservations
               .filter(res => {
+                if (!date) return false;
                 const resDate = new Date(res.start_time);
                 return resDate.toISOString().split('T')[0] === date.toISOString().split('T')[0];
               })
@@ -102,6 +107,7 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
             <div className="space-y-2">
               {reservations
                 .filter(res => {
+                  if (!date) return false;
                   const resDate = new Date(res.start_time);
                   return resDate.toISOString().split('T')[0] === date.toISOString().split('T')[0];
                 })
