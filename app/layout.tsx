@@ -1,6 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
+import { ThemeProvider } from '@/providers/ThemeProvider'
 
 export const metadata: Metadata = {
   title: 'Meeting Room Booking',
@@ -14,11 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" className="h-full">
-        <body className="h-full bg-gray-50">
-          {children}
-        </body>
-      </html>
+      <ThemeProvider defaultTheme="system" storageKey="meeting-room-theme">
+        <html lang="en" className="h-full">
+          <body className="h-full">
+            {children}
+          </body>
+        </html>
+      </ThemeProvider>
     </ClerkProvider>
   )
 }

@@ -68,7 +68,7 @@ const BookingModal = ({ isOpen, onClose, date, room, existingReservation, onSucc
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-card p-6 rounded-lg w-full max-w-md relative">
         <button 
           onClick={onClose}

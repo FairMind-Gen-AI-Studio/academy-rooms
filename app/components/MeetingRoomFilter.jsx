@@ -43,7 +43,7 @@ const MeetingRoomFilter = ({ onFilterChange }) => {
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg">
+    <div className="space-y-4 p-4 border border-border rounded-lg bg-card text-card-foreground">
       <div className="space-y-2">
         <Label htmlFor="search">Cerca sala</Label>
         <Input
