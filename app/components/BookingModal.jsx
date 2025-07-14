@@ -27,16 +27,16 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-card p-6 rounded-lg w-full max-w-md relative">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white p-8 rounded-2xl w-full max-w-md relative shadow-2xl border border-slate-200 animate-in fade-in-0 zoom-in-95 duration-300">
         <button 
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+          className="absolute right-6 top-6 text-slate-400 hover:text-slate-600 transition-colors duration-200 p-1 rounded-full hover:bg-slate-100"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
         
-        <h2 className="text-xl font-bold mb-4">
+        <h2 className="text-2xl font-bold mb-6 text-slate-800">
           {existingReservation ? 'Gestisci Prenotazione' : 'Nuova Prenotazione'}
         </h2>
         
@@ -103,4 +103,4 @@ const BookingModal = ({ isOpen, onClose, date, existingReservation, onBook, onDe
   );
 };
 
-export default BookingModal; 
+export default BookingModal;  
