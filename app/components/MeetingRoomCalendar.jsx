@@ -37,10 +37,10 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'booked': return 'bg-red-500';
-      case 'tentative': return 'bg-yellow-500';
-      case 'available': return 'bg-green-500';
-      default: return 'bg-gray-200';
+      case 'booked': return 'bg-red-100 border-red-200 text-red-800';
+      case 'tentative': return 'bg-amber-100 border-amber-200 text-amber-800';
+      case 'available': return 'bg-emerald-100 border-emerald-200 text-emerald-800';
+      default: return 'bg-slate-100 border-slate-200 text-slate-600';
     }
   };
 
@@ -108,7 +108,7 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
             return (
               <div 
                 key={day.toISOString()} 
-                className={`h-20 ${getStatusColor(status)} rounded-md p-2 cursor-pointer transition-colors`}
+                className={`h-24 ${getStatusColor(status)} rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md border-2 flex items-center justify-center text-sm font-medium`}
                 onClick={() => {
                   const reservation = reservations.find(r => 
                     r.roomId === selectedRoom?.id && 
@@ -116,7 +116,9 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
                   );
                   handleSlotClick(day, reservation);
                 }}
-              />
+              >
+                {status === 'available' ? 'Available' : status === 'booked' ? 'Booked' : 'Tentative'}
+              </div>
             );
           })}
         </div>
@@ -129,10 +131,10 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
   }
 
   return (
-    <Card className="mt-4">
-      <CardContent className="p-6">
+    <Card className="mt-4 bg-white border-slate-200 shadow-sm">
+      <CardContent className="p-6 bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">{selectedRoom.name} - Calendar</h2>
+          <h2 className="text-xl font-bold text-slate-800">{selectedRoom.name} - Calendar</h2>
           <Select value={timeZone} onValueChange={setTimeZone}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Time zone" />
@@ -158,4 +160,4 @@ const MeetingRoomCalendar = ({ selectedRoom }) => {
   );
 };
 
-export default MeetingRoomCalendar; 
+export default MeetingRoomCalendar;    
